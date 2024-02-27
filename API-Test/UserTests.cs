@@ -15,15 +15,18 @@ public class UserTests
 {
     private readonly AppDbContext _context;
     private readonly IPasswordService _passwordService;
-    private readonly ITokenService _tokenService;
+    private readonly Mock<ITokenService> _tokenService;
     private readonly UserController _controller;
 
     public UserTests()
     {
         _context = DbContextFactory.CreateInMemoryDbContext();
-        _tokenService = TokenServiceFactory.GenerateTokenServiceMock();
+        _tokenService = new Mock<ITokenService>();
         _passwordService = PasswordServiceFactory.CreatePasswordServiceMock();
-        _controller = new(_context, _passwordService, _tokenService);
+        _controller = new(_context, _passwordService, _tokenService.Object);
+
+        _tokenService.Setup(m => m.GenerateToken(It.IsAny<UsersModel>()))
+            .Returns("mocked_token");
     }
 
     [Fact]
