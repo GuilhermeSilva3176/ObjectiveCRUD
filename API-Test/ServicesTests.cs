@@ -1,6 +1,6 @@
 namespace API_Test
 {
-    public class UnitTest1
+    public class ServicesTests
     {
         [Fact]
         public void Test1()
