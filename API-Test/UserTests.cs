@@ -25,8 +25,7 @@ public class UserTests
         _passwordService = PasswordServiceFactory.CreatePasswordServiceMock();
         _controller = new(_context, _passwordService, _tokenService.Object);
 
-        _tokenService.Setup(m => m.GenerateToken(It.IsAny<UsersModel>()))
-            .Returns("mocked_token");
+        _tokenService.Setup(m => m.GenerateToken(It.IsAny<UsersModel>())).Returns("mocked_token");
     }
 
     [Fact]
@@ -160,6 +159,7 @@ public class UserTests
 
         _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
             .Returns(_context.Users.Find(id)!);
+       
 
         DeleteDto deleteAccountReturnOk = new()
         {

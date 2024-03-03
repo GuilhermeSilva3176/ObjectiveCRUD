@@ -58,7 +58,7 @@ public class EventsController : ControllerBase
                 r.EventDescription,
                 r.EventDate,
             });
-
+        
         return Ok(eventGet);
     }
 
