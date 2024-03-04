@@ -51,12 +51,12 @@ public class EventsController : ControllerBase
         var user = _TokenService.GetUserByToken(User);
         var eventGet = _Db.Events
             .Where(e => e.UserId == user.Id)
-            .Select(r => new
+            .Select(r => new EventDto
             {
-                r.Id,
-                r.EventName,
-                r.EventDescription,
-                r.EventDate,
+                Id = r.Id,
+                EventName = r.EventName,
+                EventDescription = r.EventDescription,
+                EventDate = r.EventDate,
             });
         
         return Ok(eventGet);
@@ -68,12 +68,15 @@ public class EventsController : ControllerBase
     {
         var getEvent = _Db.Events.Find(dto.Id)!;
 
-        var response = new
+        if(getEvent == null)
+            return BadRequest("Event doesn't exist");
+
+        var response = new EventDto
         {
-            getEvent.Id,
-            getEvent.EventName,
-            getEvent.EventDescription,
-            getEvent.EventDate,
+            Id = getEvent.Id,
+            EventName = getEvent.EventName,
+            EventDescription = getEvent.EventDescription,
+            EventDate = getEvent.EventDate,
         };
 
         return Ok(response);

@@ -53,7 +53,6 @@ public class RegistrationController : ControllerBase
 
         return Ok("Registration has been deleted.");
     }
-    // dar get em todas as registrations de um evento.
     [Authorize]
     [HttpGet("Get")]
     public IActionResult Get() 

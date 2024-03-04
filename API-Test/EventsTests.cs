@@ -6,9 +6,11 @@ using API.Model.DTOs.EventsDtos;
 using API.Model.DTOs.UserDtos;
 using API_Test.UserFactory;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace API_Test;
 
@@ -44,7 +46,7 @@ public class EventsTests
         // Arrange
         CreateEventsDto eventCreatorDto = new()
         {
-            EventName = "TestEvent",
+            EventName = "TestEventCreate",
             EventDescription = "TestEvent",
             EventDate = DateTime.UtcNow,
         };
@@ -93,7 +95,7 @@ public class EventsTests
     }
 
     [Fact]
-    public async void Get_Return_OkResult_When_Has_Event()
+    public async void Get_Return_OkResult_When_Getting_All()
     {
         // Arrange
         CreateEventsDto eventCreatorDto = new()
@@ -102,17 +104,64 @@ public class EventsTests
             EventDescription = "TestEvent",
             EventDate = DateTime.UtcNow,
         };
+        CreateEventsDto eventCreatorDto2 = new()
+        {
+            EventName = "TestEvent2",
+            EventDescription = "TestEvent2",
+            EventDate = DateTime.UtcNow
+        };
+
         _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
             .Returns(_context.Users.Find(_id)!);
 
-        var event1 = await _eventsController.Create(eventCreatorDto);
+        await _eventsController.Create(eventCreatorDto);
+        await _eventsController.Create(eventCreatorDto2);
 
         // Act
         IActionResult successfully = _eventsController.Get();
-        EventsModel eventM = _context.Events.FirstOrDefault(m => m.EventName == eventCreatorDto.EventName)!;
+        var okResult = Assert.IsType<OkObjectResult>(successfully);
+        var events = Assert.IsAssignableFrom<IEnumerable<EventDto>>(okResult.Value);
 
         // Assert
         Assert.IsType<OkObjectResult>(successfully);
-        Assert.Equal(eventCreatorDto.EventName, eventM.EventName);
+        Assert.Contains(events, e => e.EventName == eventCreatorDto.EventName);
+        Assert.Contains(events, e => e.EventName == eventCreatorDto2.EventName);
+    }
+
+    [Fact]
+    public async void GetById_Return_OkResult_When_Getting_By_Id()
+    {
+        // Arrange
+        Guid id = Guid.NewGuid();
+        EventsModel eventCreator = new()
+        {
+            Id = id,
+            UserId = _id,
+            EventName = "TestEvent",
+            EventDescription = "TestEvent",
+            EventDate = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        GetEventDto eventCreatorDto = new()
+        {
+            Id = id
+        };
+
+        _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
+            .Returns(_context.Users.Find(_id)!);
+
+        _context.Events.Add(eventCreator);
+        await _context.SaveChangesAsync();
+
+        // Act
+        IActionResult successfully = _eventsController.GetById(eventCreatorDto);
+        var okResult = Assert.IsType<OkObjectResult>(successfully);
+        var events = Assert.IsAssignableFrom<EventDto>(okResult.Value);
+
+        // Assert
+        Assert.IsType<OkObjectResult>(successfully);
+        Assert.Equal(eventCreator.EventName, events.EventName);
     }
 }
