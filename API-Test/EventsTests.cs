@@ -164,4 +164,47 @@ public class EventsTests
         Assert.IsType<OkObjectResult>(successfully);
         Assert.Equal(eventCreator.EventName, events.EventName);
     }
+
+    [Fact]
+    public async void Update_Returns_OkResult_When_Updated()
+    {
+        // Arrange
+        Guid id = Guid.NewGuid();
+        EventsModel registerEvent = new()
+        {
+            Id = id,
+            UserId = _id,
+            EventName = "TestEventForUpdate",
+            EventDescription = "TestEvent",
+            EventDate = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
+           .Returns(_context.Users.Find(_id)!);
+
+        _context.Events.Add(registerEvent);
+        await _context.SaveChangesAsync();
+
+        UpdateEventDto eventUpdated = new()
+        {
+            Id = id,
+            EventName = "NameChanged",
+            EventDescription = "DescriptionChanged",
+            EventDate = DateTime.UtcNow,
+        };
+
+        // Act
+        IActionResult successfully = _eventsController.Update(eventUpdated);
+
+        // Assert
+        Assert.IsType<OkObjectResult>(successfully);
+    }
+
+    [Fact]
+    public async void Delete_Return_OkResult_when_Deleted()
+    {
+        lm
+    }
 }

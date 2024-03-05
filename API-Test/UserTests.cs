@@ -143,7 +143,6 @@ public class UserTests
     public async void Delete_Return_OkResult_when_Deleted()
     {
         // Arrange
-
         Guid id = Guid.NewGuid();
         UsersModel user = new()
         {
