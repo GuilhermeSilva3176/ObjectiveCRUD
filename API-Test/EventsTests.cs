@@ -3,18 +3,14 @@ using API.Data;
 using API.Interfaces;
 using API.Model;
 using API.Model.DTOs.EventsDtos;
-using API.Model.DTOs.UserDtos;
 using API_Test.UserFactory;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace API_Test;
 
-public class EventsTests
+public class RegistrationTests
 {
     private readonly AppDbContext _context;
     private readonly Mock<ITokenService> _tokenService;
@@ -22,7 +18,7 @@ public class EventsTests
     private readonly UsersModel _user;
     private readonly Guid _id = Guid.NewGuid();
 
-    public EventsTests()
+    public RegistrationTests()
     {
         _context = DbContextFactory.CreateInMemoryDbContext();
         _tokenService = new Mock<ITokenService>();
@@ -144,7 +140,7 @@ public class EventsTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        GetEventDto eventCreatorDto = new()
+        GetByIdDto eventCreatorDto = new()
         {
             Id = id
         };
@@ -200,11 +196,41 @@ public class EventsTests
 
         // Assert
         Assert.IsType<OkObjectResult>(successfully);
+        Assert.Equal(registerEvent.EventName, eventUpdated.EventName);
     }
 
     [Fact]
     public async void Delete_Return_OkResult_when_Deleted()
     {
-        lm
+        // Arrange
+        Guid id = Guid.NewGuid();
+        EventsModel registerEvent = new()
+        {
+            Id = id,
+            UserId = _id,
+            EventName = "TestEventForUpdate",
+            EventDescription = "TestEvent",
+            EventDate = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
+           .Returns(_context.Users.Find(_id)!);
+
+        _context.Events.Add(registerEvent);
+        await _context.SaveChangesAsync();
+
+        DeleteEventsDto eventDeleted = new()
+        {
+            EventId = id,
+        };
+
+        // Act
+        IActionResult successfully = _eventsController.Delete(eventDeleted);
+
+        // Assert
+        Assert.IsType<OkObjectResult>(successfully);
+        Assert.Null(_context.Events.Find(id));
     }
 }

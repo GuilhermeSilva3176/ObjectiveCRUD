@@ -2,5 +2,5 @@
 
 public class DeleteRegisDto
 {
-    public Guid EventId { get; set; }
+    public Guid RegistrationId { get; set; }
 }

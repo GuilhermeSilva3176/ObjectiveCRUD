@@ -23,14 +23,18 @@ public class RegistrationController : ControllerBase
     [HttpPost("Create")]
     public async Task<IActionResult> Create([FromBody] CreateRegisDto dto)
     {
+
+        if (_Db.Events.Find(dto.EventId) == null)
+            return NotFound("This event does not exist");
+        
         var user = _TokenService.GetUserByToken(User);
 
         var register = new RegistrationModel
         {
             Id = Guid.NewGuid(),
-            EventId = dto.EventsId,
+            EventId = dto.EventId,
             UserId = user.Id
-        };
+        };       
 
         _Db.Registration.Add(register);
         await _Db.SaveChangesAsync();
@@ -43,7 +47,7 @@ public class RegistrationController : ControllerBase
     public IActionResult Delete([FromBody] DeleteRegisDto dto)
     {
         var user = _TokenService.GetUserByToken(User);
-        var regis = _Db.Registration.Find(dto.EventId);
+        var regis = _Db.Registration.Find(dto.RegistrationId);
         
         if (regis == null || user.Id != regis.UserId) 
             return Unauthorized();
@@ -60,12 +64,12 @@ public class RegistrationController : ControllerBase
         var user = _TokenService.GetUserByToken(User);
         var regis = _Db.Registration
             .Where(r => r.UserId == user.Id)
-            .Select(r => new
+            .Select(r => new RegistrationDto
             {
-                r.Id,
-                r.Users.Name,
-                r.Events.EventName,
-                r.Events.EventDate
+                Id = r.Id,
+                UserName = r.Users.Name,
+                EventName = r.Events.EventName,
+                EventDate = r.Events.EventDate
             });
 
         return Ok(regis);
@@ -80,12 +84,12 @@ public class RegistrationController : ControllerBase
         if (regis == null || user.Id != regis.UserId)
             return Unauthorized();
 
-        var response = new 
+        var response = new RegistrationDto
         {
-            regis.Id,
-            regis.Users.Name,
-            regis.Events.EventName,
-            regis.Events.EventDate,
+            Id = regis.Id,
+            UserName = regis.Users.Name,
+            EventName = regis.Events.EventName,
+            EventDate = regis.Events.EventDate
         };
 
         return Ok(response);

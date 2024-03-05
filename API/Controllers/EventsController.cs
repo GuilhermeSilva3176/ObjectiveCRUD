@@ -53,7 +53,7 @@ public class EventsController : ControllerBase
             .Where(e => e.UserId == user.Id)
             .Select(r => new EventDto
             {
-                Id = r.Id,
+                EventId = r.Id,
                 EventName = r.EventName,
                 EventDescription = r.EventDescription,
                 EventDate = r.EventDate,
@@ -64,7 +64,7 @@ public class EventsController : ControllerBase
 
     [Authorize]
     [HttpGet("GetById")]
-    public IActionResult GetById([FromQuery] GetEventDto dto)
+    public IActionResult GetById([FromQuery] GetByIdDto dto)
     {
         var getEvent = _Db.Events.Find(dto.Id)!;
 
@@ -73,7 +73,7 @@ public class EventsController : ControllerBase
 
         var response = new EventDto
         {
-            Id = getEvent.Id,
+            EventId = getEvent.Id,
             EventName = getEvent.EventName,
             EventDescription = getEvent.EventDescription,
             EventDate = getEvent.EventDate,

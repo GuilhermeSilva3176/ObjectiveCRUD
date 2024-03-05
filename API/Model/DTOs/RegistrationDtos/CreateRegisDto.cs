@@ -2,5 +2,5 @@
 
 public class CreateRegisDto
 {
-    public Guid EventsId { get; set;}
+    public Guid EventId { get; set;}
 }

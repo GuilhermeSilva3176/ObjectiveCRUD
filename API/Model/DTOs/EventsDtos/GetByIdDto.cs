@@ -1,6 +1,6 @@
 ﻿namespace API.Model.DTOs.EventsDtos;
 
-public class GetEventDto
+public class GetByIdDto
 {
     public Guid Id { get; set; }
 }
