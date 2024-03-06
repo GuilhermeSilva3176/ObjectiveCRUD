@@ -1,6 +1,6 @@
 ﻿namespace API.Model.DTOs.RegistrationDtos;
 
-public class GetByIdDto
+public class GetRegisByIdDto
 {
     public Guid Id { get; set; }
 }

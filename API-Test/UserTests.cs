@@ -5,7 +5,6 @@ using API.Model;
 using API.Model.DTOs.UserDtos;
 using API_Test.UserFactory;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Security.Claims;
 

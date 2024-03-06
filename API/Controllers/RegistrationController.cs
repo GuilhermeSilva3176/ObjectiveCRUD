@@ -76,7 +76,7 @@ public class RegistrationController : ControllerBase
     }
     [Authorize]
     [HttpGet("GetById")]
-    public IActionResult GetById([FromQuery] GetByIdDto dto) 
+    public IActionResult GetById([FromQuery] GetRegisByIdDto dto) 
     {
         var user = _TokenService.GetUserByToken(User);
         var regis = _Db.Registration.Find(dto.Id);

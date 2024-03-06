@@ -2,18 +2,11 @@
 using API.Data;
 using API.Interfaces;
 using API.Model;
-using API.Model.DTOs.EventsDtos;
 using API.Model.DTOs.RegistrationDtos;
 using API_Test.UserFactory;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace API_Test;
 
@@ -169,9 +162,25 @@ public class RegistrationTest
             EventId = _eventId,
             UserId = _userId
         };
+        _context.Registration.Add(regis);
+        await _context.SaveChangesAsync();
+
+
+        GetRegisByIdDto getByIdRegis = new()
+        {
+            Id = id
+        };
+        
+        _tokenService.Setup(m => m.GetUserByToken(It.IsAny<ClaimsPrincipal>()))
+            .Returns(_context.Users.Find(_userId)!);
 
         // Act
+        IActionResult successfully = _registrationController.GetById(getByIdRegis);
+        var okResult = Assert.IsType<OkObjectResult>(successfully);
+        var events = Assert.IsAssignableFrom<RegistrationDto>(okResult.Value);
 
         // Assert
+        Assert.IsType<OkObjectResult>(successfully);
+        Assert.Equal(regis.Users.Name, events.UserName);
     }
 }
