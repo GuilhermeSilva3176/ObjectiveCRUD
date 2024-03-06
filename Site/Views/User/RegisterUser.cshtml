@@ -21,19 +21,10 @@
 
         <button type="submit" class="btn btn-primary">Register</button>
 
-        @if (!ViewData.ModelState.IsValid)
+        @if (ViewData["ErrorMessage"] != null)
         {
             <div class="text-danger">
-                <p></p>
-                <ul>
-                    @foreach (var modelState in ViewData.ModelState.Values)
-                    {
-                        foreach (var error in modelState.Errors)
-                        {
-                            <li>@error.ErrorMessage</li>
-                        }
-                    }
-                </ul>
+                <p>@ViewData["ErrorMessage"]</p>
             </div>
         }
     </div>
