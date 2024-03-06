@@ -28,7 +28,7 @@ public class UserController : Controller
                 string apiUrl = "https://localhost:7299/api/User/Create";
                 string json = JsonConvert.SerializeObject(dto);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+                 
                 HttpClient client = new();
                 HttpResponseMessage response = await client.PostAsync(apiUrl, content);
 
