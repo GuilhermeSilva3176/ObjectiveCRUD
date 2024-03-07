@@ -1,4 +1,4 @@
-﻿namespace Site.Models;
+﻿namespace Site.Models.Dtos.Users;
 
 public class UserRegisterDto
 {
