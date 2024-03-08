@@ -15,6 +15,8 @@ namespace Site.Controllers
 
         public IActionResult Index()
         {
+
+            ViewData["AuthToken"] = Request.Cookies["AuthToken"];
             return View();
         }
 

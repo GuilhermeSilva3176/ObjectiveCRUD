@@ -1,21 +1,21 @@
 ﻿@{
+    string token = ViewData["AuthToken"] as string;
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    @{
-        List<string> testList = new()
-        {
-            "Test1",
-            "Test2",
-            "Test3"
-        };
-    }
+    
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    @foreach (string text in testList)
+    @if(token != null)
     {
-        <p>@text</p>
+        <a class="btn btn-primary" asp-controller="User" asp-action="Loggout">Logout</a>
     }
+    else
+    {
+        <a class="btn btn-primary" asp-controller="User" asp-action="LoginUser">Login</a>
+
+    }
+
 
 </div>

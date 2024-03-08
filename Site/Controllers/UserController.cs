@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Site.Models.Dtos.Users;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 
@@ -62,11 +63,12 @@ public class UserController : Controller
                 HttpClient client = new();
                 HttpResponseMessage response = await client.GetAsync($"{api}?email={dto.Email}&password={dto.Password}");
 
-                if (response.IsSuccessStatusCode) 
+                if (response.IsSuccessStatusCode)
                 {
                     var token = await response.Content.ReadAsStringAsync();
 
                     Response.Cookies.Append("AuthToken", token);
+                    
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -80,4 +82,12 @@ public class UserController : Controller
         }
         return View();
     }
+
+    public IActionResult Loggout()
+    {
+        Response.Cookies.Delete("AuthToken");
+        return RedirectToAction("Index", "Home");
+    }
+
+    
 }
