@@ -10,11 +10,11 @@
     @if(token != null)
     {
         <a class="btn btn-primary" asp-controller="User" asp-action="Loggout">Logout</a>
+        <a class="btn btn-warning" asp-controller="User" asp-action="ChangePassword">Change Password</a>
     }
     else
     {
         <a class="btn btn-primary" asp-controller="User" asp-action="LoginUser">Login</a>
-
     }
 
 

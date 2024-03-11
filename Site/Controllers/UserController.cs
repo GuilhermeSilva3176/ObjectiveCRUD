@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Site.Models.Dtos.Users;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
@@ -89,5 +91,44 @@ public class UserController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    
+    public IActionResult ChangePassword()
+    {
+        return View();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            try
+            {
+                string api = "https://localhost:7299/api/User/Update";
+
+                var jwtToken = Request.Cookies["AuthToken"];
+
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+                HttpResponseMessage response = await client.PutAsJsonAsync(api, dto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ViewData["ErrorMessage"] = "Failed to change password.";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = "An error ocourred whiling processing your request";
+            }
+        }
+        ViewData["ErrorMessage"] = "Pão doce";
+        return View();
+    }
 }
