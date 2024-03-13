@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Site.Interfaces;
 using Site.Models.Dtos.Users;
 using System.Net;
 using System.Net.Http.Headers;
@@ -11,27 +12,21 @@ namespace Site.Controllers;
 
 public class UserController : Controller
 {
+
     public IActionResult RegisterUser()
     {
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> RegisterUser(UserRegisterDto dto)
+    public async Task<IActionResult> RegisterUser(UserRegisterDto dto, [FromServices] IUserNoAuthInterfaces icreateUsr)
     {
 
         if (ModelState.IsValid)
         {
             try
             {
-                string api = "https://localhost:7299/api/User/Create";
-
-                string json = JsonConvert.SerializeObject(dto);
-
-                var content = new StringContent(json, Encoding.UTF8, "application/json"); 
-
-                HttpClient client = new();
-                HttpResponseMessage response = await client.PostAsync(api, content);
+                var response = await icreateUsr.RegisterAsync(dto);
 
                 if (response.IsSuccessStatusCode)
                     return RedirectToAction("Index", "Home");
@@ -52,30 +47,35 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> LoginUser(UserLoginDto dto)
+    public async Task<IActionResult> LoginUser(UserLoginDto dto, [FromServices] IUserNoAuthInterfaces iloginUsr)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                string api = "https://localhost:7299/api/User/Login";
-                string json = JsonConvert.SerializeObject(dto);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                HttpClient client = new();
-                HttpResponseMessage response = await client.GetAsync($"{api}?email={dto.Email}&password={dto.Password}");
+                var response = await iloginUsr.LoginAsync(dto);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var token = await response.Content.ReadAsStringAsync();
+                    var token = response.Content;
 
-                    Response.Cookies.Append("AuthToken", token);
+                    CookieOptions cookieOptions = new()
+                    {
+                        Secure = true,
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Strict
+                    };
+
+                    cookieOptions.Expires = DateTimeOffset.UtcNow.AddHours(1);
+
+                    Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
                     return RedirectToAction("Index", "Home");
                 }
-                else
+                else 
+                { 
                     ViewData["ErrorMessage"] = "Error registering user. API returned non-success status code.";
-
+                }
             } 
             catch (Exception ex)
             {
@@ -97,21 +97,24 @@ public class UserController : Controller
     }
 
     [HttpPut]
-    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto, [FromServices] IUserAuthInterfaces icreateUsr)
     {
 
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {
-                string api = "https://localhost:7299/api/User/Update";
+                
+                //var jwtToken = Request.Cookies["AuthToken"];
 
-                var jwtToken = Request.Cookies["AuthToken"];
-
+                /*
                 HttpClient client = new();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
-                HttpResponseMessage response = await client.PutAsJsonAsync(api, dto);
+                HttpResponseMessage response = await client.PostAsync(api, content);
+                */
+
+                var response = await icreateUsr.ChangePasswordAsync(dto);
 
                 if (response.IsSuccessStatusCode)
                 {
