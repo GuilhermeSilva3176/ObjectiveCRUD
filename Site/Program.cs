@@ -1,19 +1,13 @@
 using Refit;
 using Site.Interfaces;
-using Site.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRefitClient<IUserNoAuthInterfaces>()
-        .ConfigureHttpClient(c => 
-        {   
-            c.BaseAddress = new Uri("https://localhost:7299/"); 
-        });
-builder.Services.AddRefitClient<IUserAuthInterfaces>()
-        .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7299/"))
-        .AddHttpMessageHandler<AuthTokenHandler>();
+        .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7299/"));
 
 var app = builder.Build();
 

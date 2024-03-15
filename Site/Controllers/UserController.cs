@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Site.Interfaces;
 using Site.Models.Dtos.Users;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
+
 
 
 namespace Site.Controllers;
@@ -21,7 +18,6 @@ public class UserController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterUser(UserRegisterDto dto, [FromServices] IUserNoAuthInterfaces icreateUsr)
     {
-
         if (ModelState.IsValid)
         {
             try
@@ -96,7 +92,7 @@ public class UserController : Controller
         return View();
     }
 
-    [HttpPut]
+    [HttpPost]
     public async Task<IActionResult> ChangePassword(ChangePasswordDto dto, [FromServices] IUserAuthInterfaces icreateUsr)
     {
 
@@ -104,21 +100,16 @@ public class UserController : Controller
         {
             try
             {
-                
-                //var jwtToken = Request.Cookies["AuthToken"];
-
-                /*
-                HttpClient client = new();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
-                HttpResponseMessage response = await client.PostAsync(api, content);
-                */
-
-                var response = await icreateUsr.ChangePasswordAsync(dto);
+                var token = Request.Cookies["AuthToken"];
+                var response = await icreateUsr.ChangePasswordAsync(token, dto);
 
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index", "Home");
+                }
+                else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    ViewData["ErrorMessage"] = "Unauthorized to change password.";
                 }
                 else
                 {
@@ -131,7 +122,6 @@ public class UserController : Controller
                 ViewData["ErrorMessage"] = "An error ocourred whiling processing your request";
             }
         }
-        ViewData["ErrorMessage"] = "Pão doce";
         return View();
     }
 }

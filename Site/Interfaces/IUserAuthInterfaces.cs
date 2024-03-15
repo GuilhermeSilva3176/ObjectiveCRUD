@@ -8,5 +8,5 @@ namespace Site.Interfaces;
 public interface IUserAuthInterfaces
 {
     [Put("/api/User/Update")]
-    Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordDto dto);
+    Task<ApiResponse<string>> ChangePasswordAsync(string token, ChangePasswordDto dto);
 }
