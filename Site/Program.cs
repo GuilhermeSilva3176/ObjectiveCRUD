@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddRefitClient<IUserNoAuthInterfaces>()
+builder.Services.AddRefitClient<IUserAuthInterfaces>()
         .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7299/"));
 
 var app = builder.Build();

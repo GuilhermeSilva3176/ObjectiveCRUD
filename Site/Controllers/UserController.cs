@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Site.Interfaces;
 using Site.Models.Dtos.Users;
 using System.Net;
@@ -16,7 +17,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> RegisterUser(UserRegisterDto dto, [FromServices] IUserNoAuthInterfaces icreateUsr)
+    public async Task<IActionResult> RegisterUser(UserRegisterDto dto, [FromServices] IUserAuthInterfaces icreateUsr)
     {
         if (ModelState.IsValid)
         {
@@ -43,7 +44,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> LoginUser(UserLoginDto dto, [FromServices] IUserNoAuthInterfaces iloginUsr)
+    public async Task<IActionResult> LoginUser(UserLoginDto dto, [FromServices] IUserAuthInterfaces iloginUsr)
     {
         if (ModelState.IsValid)
         {
@@ -100,8 +101,7 @@ public class UserController : Controller
         {
             try
             {
-                var token = Request.Cookies["AuthToken"];
-                var response = await icreateUsr.ChangePasswordAsync(token, dto);
+                var response = await icreateUsr.ChangePasswordAsync(dto);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -123,5 +123,36 @@ public class UserController : Controller
             }
         }
         return View();
+    }
+    public IActionResult DeleteUser()
+    {
+        return View();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser(DeleteUserDto dto, [FromServices] IUserAuthInterfaces ideleteUrs)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var response = await ideleteUrs.DeleteUserAsync(dto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ViewData["ErrorMessage"] = "Unauthorized to delete account.";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = "An error ocourred whiling processing your request";
+            }
+        }
+            return View();
     }
 }
