@@ -60,20 +60,19 @@ public class UserController : Controller
                     {
                         Secure = true,
                         HttpOnly = true,
-                        SameSite = SameSiteMode.Strict
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddHours(1)
                     };
 
-                    cookieOptions.Expires = DateTimeOffset.UtcNow.AddHours(1);
-
                     Response.Cookies.Append("AuthToken", token, cookieOptions);
-                    
+
                     return RedirectToAction("Index", "Home");
                 }
-                else 
-                { 
+                else
+                {
                     ViewData["ErrorMessage"] = "Error registering user. API returned non-success status code.";
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 ViewData["ErrorMessage"] = "An error occurred while processing your request ";
@@ -93,7 +92,7 @@ public class UserController : Controller
         return View();
     }
 
-    [HttpPost]
+    [HttpPut]
     public async Task<IActionResult> ChangePassword(ChangePasswordDto dto, [FromServices] IUserAuthInterfaces icreateUsr)
     {
 
@@ -101,19 +100,29 @@ public class UserController : Controller
         {
             try
             {
-                var response = await icreateUsr.ChangePasswordAsync(dto);
+                if (Request.Cookies.TryGetValue("AuthToken", out string tokenValue))
+                {
+                    var response = await icreateUsr.ChangePasswordAsync(dto, tokenValue);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    ViewData["ErrorMessage"] = "Unauthorized to change password.";
+                    var responseContent = response.Content;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        ViewData["ErrorMessage"] = "Unauthorized to change the password";
+                    }
+                    else
+                    {
+                        ViewData["ErrorMessage"] = response.StatusCode;
+                        return View();
+                    }
                 }
                 else
                 {
-                    ViewData["ErrorMessage"] = "Failed to change password.";
+                    ViewData["ErrorMessage"] = "Authentication token not found.";
                     return View();
                 }
             }
@@ -153,6 +162,6 @@ public class UserController : Controller
                 ViewData["ErrorMessage"] = "An error ocourred whiling processing your request";
             }
         }
-            return View();
+        return View();
     }
 }
